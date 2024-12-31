@@ -1,17 +1,26 @@
 import pandas as pd
 
-df = pd.read_csv("hotels.csv")
+# dtype=str gets all data as string type, even if others were of different types,
+# specifications can be done
+df = pd.read_csv("hotels.csv", dtype={"id": str})
 
 
 class Hotel:
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, hotel_id):
+        self.hotel_id = hotel_id
 
     def book(self):
-        pass
+        """Books hotel by changing availability to NO"""
+        df.loc[df["id"] == self.hotel_id, "available"] = "no"
+        # Saves change to existing csv file
+        df.to_csv("hotels.csv", index=False)
+        # index=False so that python is not able to add another column to index
 
     def available(self):
-        pass
+        """Checks if hotel is available"""
+        availability = df.loc[df["id"] == self.hotel_id, "available"].squeeze()
+        if availability == "yes":
+            return True
 
 
 class ReservationTicket:
@@ -27,7 +36,7 @@ class ReservationTicket:
 print(df)
 username = input("Enter your name: ")
 hotel_id_input = input("Enter hotel ID:")
-hotel = Hotel(id)
+hotel = Hotel(hotel_id_input)
 reservation_ticket = ReservationTicket(username, hotel)
 if hotel.available():
     hotel.book()
