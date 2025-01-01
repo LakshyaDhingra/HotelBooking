@@ -8,6 +8,7 @@ df = pd.read_csv("hotels.csv", dtype={"id": str})
 class Hotel:
     def __init__(self, hotel_id):
         self.hotel_id = hotel_id
+        self.name = df.loc[df["id"] == self.hotel_id, "name"].squeeze()
 
     def book(self):
         """Books hotel by changing availability to NO"""
@@ -24,22 +25,31 @@ class Hotel:
 
 
 class ReservationTicket:
-    def __init__(self, username, hotel):
-        self.username = username
-        self.hotel = hotel
+    def __init__(self, customer_name, hotel_object):
+        self.customer_name = customer_name
+        self.hotel_object = hotel_object
 
     def generate_ticket(self):
-        content = f"{username}, your ticket for {hotel} has been generated successfully"
+        content = f"""
+        Hi {self.customer_name}, your ticket for {self.hotel_object.name} has been generated successfully
+        
+        Here is your booking data:
+        Customer Name: {self.customer_name}
+        Hotel Name: {self.hotel_object.name}
+        Hotel ID: {self.hotel_object.hotel_id}
+        """
         return content
 
 
+
+
 print(df)
-username = input("Enter your name: ")
-hotel_id_input = input("Enter hotel ID:")
+username = input("Please, Enter your name : ")
+hotel_id_input = input("Enter Hotel ID : ")
 hotel = Hotel(hotel_id_input)
-reservation_ticket = ReservationTicket(username, hotel)
+reservation_ticket = ReservationTicket(customer_name=username, hotel_object=hotel)
 if hotel.available():
     hotel.book()
     print(reservation_ticket.generate_ticket())
 else:
-    print('Hotel is currently unavailable')
+    print('Sorry, the Hotel is currently unavailable')
