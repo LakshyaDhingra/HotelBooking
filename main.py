@@ -62,6 +62,22 @@ class CardSecurity(CreditCard):
             return True
 
 
+class Spa(Hotel):
+    def __init__(self, customer_name, hotel_name):
+        self.customer_name = customer_name
+        self.hotel_name = hotel_name
+
+    def generate_spa_ticket(self):
+        content2 = f"""
+        Thank you for your SPA reservation!
+        
+        Here is your SPA booking data:
+        Customer Name: {self.customer_name}
+        Hotel Name: {self.hotel_name}
+        """
+        return content2
+
+
 print(df)
 username = input("Please, Enter your name : ")
 hotel_id_input = input("Enter Hotel ID : ")
@@ -83,3 +99,8 @@ if hotel.available():
         print("There was a problem with the payment method, Please try again!")
 else:
     print('Sorry, the Hotel is currently unavailable')
+
+spa_package = Spa(username, hotel.name)
+package = input("Do you want to book a spa package? ")
+if package == "yes":
+    print(spa_package.generate_spa_ticket())
