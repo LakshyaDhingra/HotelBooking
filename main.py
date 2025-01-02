@@ -4,6 +4,7 @@ import pandas as pd
 # specifications can be done
 df = pd.read_csv("hotels.csv", dtype={"id": str})
 df2 = pd.read_csv("cards.csv", dtype=str).to_dict(orient="records")
+df3 = pd.read_csv("card_security.csv", dtype=str)
 
 
 class Hotel:
@@ -43,17 +44,21 @@ class ReservationTicket:
 
 
 class CreditCard:
-    def __init__(self, card_no, card_expiry, card_cvc, card_name):
+    def __init__(self, card_no):
         self.card_no = card_no
-        self.card_expiry = card_expiry
-        self.card_cvc = card_cvc
-        self.card_name = card_name
 
-    def validate(self):
+    def validate(self, card_expiry, card_cvc, card_name):
         """Checks if card is valid"""
-        card_data = {"number": self.card_no, "expiration": self.card_expiry,
-                     "cvc": self.card_cvc, "holder": self.card_name}
+        card_data = {"number": self.card_no, "expiration": card_expiry,
+                     "holder": card_name, "cvc": card_cvc}
         if card_data in df2:
+            return True
+
+
+class CardSecurity(CreditCard):
+    def authenticate(self, pass_entered):
+        auth_password = df3.loc[df3["number"] == self.card_no, "password"].squeeze()
+        if auth_password == pass_entered:
             return True
 
 
@@ -63,18 +68,18 @@ hotel_id_input = input("Enter Hotel ID : ")
 hotel = Hotel(hotel_id_input)
 reservation_ticket = ReservationTicket(customer_name=username, hotel_object=hotel)
 if hotel.available():
-    print("\nEnter your card details:- ")
-    card_number = input("Enter card number: ")
-    card_exp_date = input("Enter expiration date: ")
-    cvc_input = input("Enter cvc: ")
-    card_holder_name = input("Enter your name as it is printed on the card: ")
-
-    user_card = CreditCard(card_no=card_number, card_expiry=card_exp_date, card_cvc=cvc_input,
-                           card_name= card_holder_name)
-    if user_card.validate():
-        hotel.book()
-        print(reservation_ticket.generate_ticket())
+    print("Available to book!\n")
+    print("Processing.......")
+    auth_no = input("\nEnter your card number:- ")
+    auth_pass = input("Enter your authentication password:- ")
+    user_card = CardSecurity(card_no=auth_no)
+    if user_card.validate(card_expiry="12/26", card_cvc="123", card_name="JOHN SMITH"):
+        if user_card.authenticate(auth_pass):
+            hotel.book()
+            print(reservation_ticket.generate_ticket())
+        else:
+            print("Credit card authentication failed, Please try again!")
     else:
-        print("There is something wrong with the card, Please try again!")
+        print("There was a problem with the payment method, Please try again!")
 else:
     print('Sorry, the Hotel is currently unavailable')
